@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>DTS Reporting</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./assets/bootstrap-3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/toastr.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+
+  <style type="text/css"></style></head>
+
+  <body>
+
+    <!-- Static navbar -->
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">DTS Reporting</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="./builds.htm">Builds</a></li>
+            <li class="active"><a href="./tests.htm">Tests</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <div class="container">
+
+      <!-- Main component for a primary marketing message or call to action -->
+	  <H1>Automated Tests</H1>
+			
+		<!--
+		
+		Data in table:	Version
+						Passed / Fail / Percentage
+						Duration
+						Skipped
+						
+		-->
+		<H2>MC40 (Android)</H2>
+		<table class="table table-striped" width="647" id="mc40_table_body">
+		<thead><tr><th>#</th><th>Description</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+		<H2>MC45 (Windows Mobile 6.5)</H2>
+		<table class="table table-striped" width="647" id="mc45_table_body">
+		<thead><tr><th>Description</th><th>Device (Platform)</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+	
+	  </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./assets/jquery/jquery-2.1.0.min.js"></script>
+    <script src="./assets/toastr.min.js"></script>
+    <script src="./assets/bootstrap-3.1.1/js/bootstrap.min.js"></script>
+
+<script>
+	var NUM_BUILDS = 3;
+	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
+	var ats_server_url =		"http://192.168.0.11:8081/test.php";
+
+	var auto_common_spec_mc40 = "http://localhost:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
+	var auto_common_spec_mc45 = "http://localhost:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC45)/api/json?jsonp=?&depth=1"
+	
+	function pushBuildToATS(buildSpec, buildPassed, buildDescription, buildDate, buildDuration, buildFailed, buildTotal, buildSkipped, buildPercentagePassed)
+	{
+		$.post(ats_server_url,
+		{
+			spec:buildSpec,
+			desc:buildDescription,
+			date:buildDate,
+			duration:buildDuration,
+			passed:buildPassed,
+			failed:buildFailed,
+			total:buildTotal,
+			skipped:buildSkipped,
+			percentagePassed:buildPercentagePassed
+		},
+		function(data,status)
+		{
+			if (status === "success")
+				toastr.success('Server Response: ' + data, 'Successfully Submitted to ATS');
+			else
+				toastr.error('Failed to submit data to ATS', 'Failed to Submit to ATS');
+		});
+	}
+		
+	function doAJAX()
+	{
+		var myTable = "#mc40_table_body tbody";
+
+		function processResponse(json) 
+		{
+			var i = 0
+			var builds = json.builds;
+			var count = NUM_BUILDS;
+			if (builds.length < count)
+				count = builds.length;
+			var row = "";
+			for (i=0; i < count; i++)
+			{
+				var buildDate = new Date(builds[i].timestamp);
+				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + buildDate.getHours() + ":" + buildDate.getMinutes() + "]";
+				row = row + "<tr><td>" + builds[i].number + "</td>";
+//				row = row + "<td><span class='label " + theLabel + "'>" + buildText + "</span></td>";
+				row = row + "<td>" + builds[i].description + "</td>";
+				if (builds[i].result === "FAILURE" || builds[i].result === "ABORTED" || builds[i].building == true)
+				{
+					var failed = 0;
+					var total = 0;
+					var skipped = 0;
+					var passed = 0;
+					var percentagePassed = 0;
+					if (builds[i].building == true)
+						row = row + "<td><span class='label label-warning'>Test Running</span></td>";
+					else
+						row = row + "<td><span class='label label-danger'>No Results</span></td>";
+				}
+				else
+				{
+					var failed = builds[i].actions[1].failCount;
+					var total = builds[i].actions[1].totalCount;
+					var skipped = builds[i].actions[1].skipCount;
+					var passed = total - failed;
+					var percentagePassed = passed / total * 100;
+					var percentLabel = 'label-warning';
+					if (percentagePassed > 90)
+						percentLabel = 'label-success';
+					row = row + "<td>Passed: " + passed + "<br>Failed: " + failed + "<br><span class='label " + percentLabel + "'>Percentage: " + parseInt(percentagePassed, 10) + "%</span><br>Skipped: " + skipped + "</td>";
+				}
+				row = row + "<td>" + formattedBuildDate + "</td>";
+				row = row + "<td>" + parseInt(builds[i].duration / 1000 / 60, 10) + " minutes</td>";
+				row = row + "<td><a href='" + builds[i].url + "testReport/' target='new'>Results Link</a></td>";
+				var spec = myTable.slice(1, myTable.indexOf('_table'));
+				row = row + "<td>" + "<button type='button' class='btn btn-default btn-sm' onclick='javascript:pushBuildToATS(\"" + spec + "\",\"" + passed + "\",\"" + builds[i].description + "\",\"" + builds[i].timestamp + "\",\"" + builds[i].duration + "\",\"" + failed + "\",\"" + total + "\",\"" + skipped + "\",\"" + percentagePassed + "\")'><span class='glyphicon glyphicon-upload'></span> Push to ATS</button>" + "</td>";
+				row = row + "</tr>";
+			}
+			//console.log(myTable);
+			$(myTable).html(row);
+		}
+		//  
+		$.ajax(
+		{
+			type: 'GET',
+			url: auto_common_spec_mc40,
+			async: true,
+			jsonpCallback: 'jsonCallback',
+			contentType: "application/json",
+			dataType: 'jsonp',
+			success: processResponse,
+			error: function(e) 
+			{
+				console.log(e);
+			}
+		})
+		.then (function() 
+		{
+			myTable = "#mc45_table_body tbody";
+			return $.ajax(
+			{
+				type: 'GET',
+				url: auto_common_spec_mc45,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+					console.log(e);
+				}
+			});
+		})
+	}
+	
+	doAJAX();
+
+</script>
+
+</body></html>

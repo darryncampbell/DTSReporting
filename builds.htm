@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>DTS Reporting</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./assets/bootstrap-3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/toastr.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+
+  <style type="text/css"></style></head>
+
+  <body>
+
+    <!-- Static navbar -->
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">DTS Reporting</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./builds.htm">Builds</a></li>
+            <li><a href="./tests.htm">Tests</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <div class="container">
+
+      <!-- Main component for a primary marketing message or call to action -->
+	  <H1>Builds</H1>
+		
+		<H2>Auto Common Spec</H2>
+		<table class="table table-striped" width="647" id="auto_common_spec_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+		<H2>Manual Common Spec</H2>
+		<table class="table table-striped" width="647" id="manual_common_spec_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+		<H2>Motorola Enterprise Browser</H2>		
+		<table class="table table-striped" width="647" id="meb_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+		<H2>DCC Javascript Tests</H2>		
+		<table class="table table-striped" width="647" id="dcc_js_tests_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+	  </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./assets/jquery/jquery-2.1.0.min.js"></script>
+    <script src="./assets/toastr.min.js"></script>
+    <script src="./assets/bootstrap-3.1.1/js/bootstrap.min.js"></script>
+
+<script>
+	var NUM_BUILDS = 5;
+	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
+	var auto_common_spec_url =	"http://localhost:8080/job/Build%20App%20-%20Auto%20Common%20Spec/api/json?jsonp=?&depth=1";
+	var manual_common_spec_url ="http://localhost:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
+	var meb_url =				"http://localhost:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
+	var dcc_js_tests_url =		"http://localhost:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
+	var ats_server_url =		"http://192.168.0.11:8081/test.php";
+
+	function pushBuildToATS(buildSpec, buildSuccess, buildDescription, buildDate, buildDuration)
+	{
+		$.post(ats_server_url,
+		{
+			spec:buildSpec,
+			success:buildSuccess,
+			desc:buildDescription,
+			date:buildDate,
+			duration:buildDuration,
+		},
+		function(data,status)
+		{
+			if (status === "success")
+				toastr.success('Server Response: ' + data, 'Successfully Submitted to ATS');
+			else
+				toastr.error('Failed to submit data to ATS', 'Failed to Submit to ATS');
+		});
+	}
+	
+	function doAJAX()
+	{
+		var myTable = "#auto_common_spec_table_body tbody";
+
+		function processResponse(json) 
+		{
+			var i = 0
+			var builds = json.builds;
+			var count = NUM_BUILDS;
+			if (builds.length < count)
+				count = builds.length;
+			var row = "";
+			var tableName = "#" + json.url + " tbody";
+			for (i=0; i < count; i++)
+			{
+				var buildDate = new Date(builds[i].timestamp);
+				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + buildDate.getHours() + ":" + buildDate.getMinutes() + "]";
+				var theLabel = "label-success";
+				var buildText = ""
+				if (builds[i].building == true)
+				{
+					theLabel = 'label-warning';
+					buildText = "building";
+				}
+				else
+				{
+					if (builds[i].result === "FAILURE" || builds[i].result === "ABORTED")
+						theLabel = 'label-danger';
+					buildText = builds[i].result.toLowerCase();	
+				}
+				row = row + "<tr><td>" + builds[i].number + "</td>";
+				row = row + "<td><span class='label " + theLabel + "'>" + buildText + "</span></td>";
+				row = row + "<td>" + builds[i].description + "</td>";
+				row = row + "<td>" + formattedBuildDate + "</td>";
+				row = row + "<td>" + parseInt(builds[i].duration / 1000 / 60, 10) + " minutes</td>";
+				var spec = myTable.slice(1, myTable.indexOf('_table'));
+				row = row + "<td>" + "<button type='button' class='btn btn-default btn-sm' onclick='javascript:pushBuildToATS(\"" + spec + "\",\"" + buildText + "\",\"" + builds[i].description + "\",\"" + builds[i].timestamp + "\",\"" + builds[i].duration + "\")'><span class='glyphicon glyphicon-upload'></span> Push to ATS</button>" + "</td>";
+				row = row + "</tr>";
+			}
+			//console.log(myTable);
+			$(myTable).html(row);
+		}
+		//  
+		$.ajax(
+		{
+			type: 'GET',
+			url: auto_common_spec_url,
+			async: true,
+			jsonpCallback: 'jsonCallback',
+			contentType: "application/json",
+			dataType: 'jsonp',
+			success: processResponse,
+			error: function(e) 
+			{
+				console.log(e);
+			}
+		})
+		.then (function() 
+		{
+			myTable = "#manual_common_spec_table_body tbody";
+			return $.ajax(
+			{
+				type: 'GET',
+				url: manual_common_spec_url,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+					console.log(e);
+				}
+			});
+		})
+		.then (function() 
+		{
+			myTable = "#meb_table_body tbody";
+			return $.ajax(
+			{
+				type: 'GET',
+				url: meb_url,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e) 
+				{
+					console.log(e);
+				}
+			});
+		})
+		.then (function()
+		{
+			myTable = "#dcc_js_tests_table_body tbody";
+			return $.ajax({
+			   type: 'GET',
+				url: dcc_js_tests_url,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+				   console.log(e);
+				}
+			});
+		})
+	}
+
+	doAJAX();
+
+</script>
+
+</body></html>
