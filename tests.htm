@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAA////AAMDjAD4+PgA1dTTACCGngDp6OcAHH2UAB+FnQDU09IAG3qQAJaUkgDh4N8A/f39AGJi/AAICP8AI4ifAAUF5gC/4egAK4yiAL+9vAAdgJcAGXWKAB6CmgDx8fAA393cAAQEyQA5k6cAT52vAN/e3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYWFhYWFhYWFhYAAAAAAAAKCgoKCgoKCgoKFgAAAAAACg0NDQ0NDQ0NFhYAAAAAAAcBAwMDAwMDAxYWAAAAAAAVAQECERgYGBgWFgAAAAAAFwECERoaBgYGFhYAAAAAAAgCEQ8OEQIZGRYWAAAAAAAFAQ8OAQ4PDwEWFgAAAAAAEAEBAQEBDg4CFhYAAAAAABMBAQEBAQECARYWAAAAAAAbAQsLCwsLCwEWFgAAAAAAHAEUFBQdHRQBFhYAAAAAABISCwsEDAsLEhIWAAAAAAAAAAAACQsAAAAAAAAAAAAAAAAAAAsLAAAAAAAAAP//AADgBwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA/n8AAP5/AAA=" rel="icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -58,7 +59,7 @@
 
 		<H2>MC45 (Windows Mobile 6.5)</H2>
 		<table class="table table-striped" width="647" id="mc45_table_body">
-		<thead><tr><th>Description</th><th>Device (Platform)</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
+		<thead><tr><th>#</th><th>Description</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
 		<tbody></tbody></table>	  
 	
 	  </div> <!-- /container -->
@@ -75,9 +76,14 @@
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
 	var ats_server_url =		"http://192.168.0.11:8081/test.php";
 
-	var auto_common_spec_mc40 = "http://localhost:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
-	var auto_common_spec_mc45 = "http://localhost:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC45)/api/json?jsonp=?&depth=1"
+	var auto_common_spec_mc40 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
+	var auto_common_spec_mc45 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC45)/api/json?jsonp=?&depth=1"
 	
+	function pad(num, size) {
+		var s = "000000000" + num;
+		return s.substr(s.length-size);
+	}
+
 	function pushBuildToATS(buildSpec, buildPassed, buildDescription, buildDate, buildDuration, buildFailed, buildTotal, buildSkipped, buildPercentagePassed)
 	{
 		$.post(ats_server_url,
@@ -116,10 +122,13 @@
 			for (i=0; i < count; i++)
 			{
 				var buildDate = new Date(builds[i].timestamp);
-				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + buildDate.getHours() + ":" + buildDate.getMinutes() + "]";
+				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + pad(buildDate.getHours(),2) + ":" + pad(buildDate.getMinutes(),2) + "]";
 				row = row + "<tr><td>" + builds[i].number + "</td>";
 //				row = row + "<td><span class='label " + theLabel + "'>" + buildText + "</span></td>";
 				row = row + "<td>" + builds[i].description + "</td>";
+				var actionIndex = 1;
+				if (builds[i].actions[actionIndex].failCount === undefined)
+					actionIndex = 2;
 				if (builds[i].result === "FAILURE" || builds[i].result === "ABORTED" || builds[i].building == true)
 				{
 					var failed = 0;
@@ -134,9 +143,9 @@
 				}
 				else
 				{
-					var failed = builds[i].actions[1].failCount;
-					var total = builds[i].actions[1].totalCount;
-					var skipped = builds[i].actions[1].skipCount;
+					var failed = builds[i].actions[actionIndex].failCount;
+					var total = builds[i].actions[actionIndex].totalCount;
+					var skipped = builds[i].actions[actionIndex].skipCount;
 					var passed = total - failed;
 					var percentagePassed = passed / total * 100;
 					var percentLabel = 'label-warning';

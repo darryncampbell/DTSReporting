@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAA////AAMDjAD4+PgA1dTTACCGngDp6OcAHH2UAB+FnQDU09IAG3qQAJaUkgDh4N8A/f39AGJi/AAICP8AI4ifAAUF5gC/4egAK4yiAL+9vAAdgJcAGXWKAB6CmgDx8fAA393cAAQEyQA5k6cAT52vAN/e3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYWFhYWFhYWFhYAAAAAAAAKCgoKCgoKCgoKFgAAAAAACg0NDQ0NDQ0NFhYAAAAAAAcBAwMDAwMDAxYWAAAAAAAVAQECERgYGBgWFgAAAAAAFwECERoaBgYGFhYAAAAAAAgCEQ8OEQIZGRYWAAAAAAAFAQ8OAQ4PDwEWFgAAAAAAEAEBAQEBDg4CFhYAAAAAABMBAQEBAQECARYWAAAAAAAbAQsLCwsLCwEWFgAAAAAAHAEUFBQdHRQBFhYAAAAAABISCwsEDAsLEhIWAAAAAAAAAAAACQsAAAAAAAAAAAAAAAAAAAsLAAAAAAAAAP//AADgBwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA4AMAAOADAADgAwAA/n8AAP5/AAA=" rel="icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -75,26 +76,42 @@
 <script>
 	var NUM_BUILDS = 5;
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
-	var auto_common_spec_url =	"http://localhost:8080/job/Build%20App%20-%20Auto%20Common%20Spec/api/json?jsonp=?&depth=1";
-	var manual_common_spec_url ="http://localhost:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
-	var meb_url =				"http://localhost:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
-	var dcc_js_tests_url =		"http://localhost:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
-	var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	var monthsFull = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+	var auto_common_spec_url =	"http://192.168.0.11:8080/job/Build%20App%20-%20Auto%20Common%20Spec/api/json?jsonp=?&depth=1";
+	var manual_common_spec_url ="http://192.168.0.11:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
+	var meb_url =				"http://192.168.0.11:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
+	var dcc_js_tests_url =		"http://192.168.0.11:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
+	// var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
 
-	function pushBuildToATS(buildSpec, buildSuccess, buildDescription, buildDate, buildDuration)
+	function pad(num, size) {
+		var s = "000000000" + num;
+		return s.substr(s.length-size);
+	}
+
+	function pushBuildToATS(buildSpec, buildSuccess, buildDescription, theBuildDate, buildDuration)
 	{
+		var buildDate = new Date((theBuildDate * 1));//new Date(theBuildDate);
+		var utc = buildDate.toUTCString();
+//		var formattedBuildDate = buildDate.getDate() + " " + monthsFull[buildDate.getMonth()] + " " + buildDate.getFullYear() + " " + pad(buildDate.getHours(),2) + ":" + pad(buildDate.getMinutes(),2) + " BST";
+		var desc = buildDescription + ".  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.  <br/>Result: " + buildSuccess + ".  App: " + buildSpec + "";
+
 		$.post(ats_server_url,
 		{
-			spec:buildSpec,
-			success:buildSuccess,
-			desc:buildDescription,
-			date:buildDate,
-			duration:buildDuration,
+			operation:'add_version',
+			created:utc,
+			description:desc
+	
+//			spec:buildSpec,
+//			success:buildSuccess,
+//			desc:buildDescription,
+//			date:buildDate,
+//			duration:buildDuration,
 		},
 		function(data,status)
 		{
 			if (status === "success")
-				toastr.success('Server Response: ' + data, 'Successfully Submitted to ATS');
+				toastr.success('Server Response: ' + JSON.stringify(data), 'Successfully Submitted to ATS');
 			else
 				toastr.error('Failed to submit data to ATS', 'Failed to Submit to ATS');
 		});
@@ -116,7 +133,7 @@
 			for (i=0; i < count; i++)
 			{
 				var buildDate = new Date(builds[i].timestamp);
-				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + buildDate.getHours() + ":" + buildDate.getMinutes() + "]";
+				var formattedBuildDate = buildDate.getDate() + "/" + months[buildDate.getMonth()] + "/" + buildDate.getFullYear() + " [" + pad(buildDate.getHours(),2) + ":" + pad(buildDate.getMinutes(),2) + "]";
 				var theLabel = "label-success";
 				var buildText = ""
 				if (builds[i].building == true)

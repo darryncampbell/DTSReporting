@@ -1,5 +1,7 @@
 <html>
 <head>
+	<META http-equiv="refresh" content="1;URL=./builds.htm">
+
   <style>
     html, body { margin: 0; padding: 0 ; }
     #content {
