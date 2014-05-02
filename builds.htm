@@ -78,6 +78,9 @@
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
 	var monthsFull = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 	var auto_common_spec_url =	"http://192.168.0.11:8080/job/Build%20App%20-%20Auto%20Common%20Spec/api/json?jsonp=?&depth=1";
+	var auto_common_spec_url_wm 		=	"http://192.168.0.11:8080/job/Build%20App%20-%20Auto%20Common%20Spec%20(WM)/api/json?jsonp=?&depth=1";
+	var auto_common_spec_url_ce			=	"http://192.168.0.11:8080/job/Build%20App%20-%20Auto%20Common%20Spec%20(CE)/api/json?jsonp=?&depth=1";
+	var auto_common_spec_url_android	=	"http://192.168.0.11:8080/job/Build%20App%20-%20Auto%20Common%20Spec%20(Android)/api/json?jsonp=?&depth=1";
 	var manual_common_spec_url ="http://192.168.0.11:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
 	var meb_url =				"http://192.168.0.11:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
 	var dcc_js_tests_url =		"http://192.168.0.11:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
@@ -216,6 +219,23 @@
 			return $.ajax({
 			   type: 'GET',
 				url: dcc_js_tests_url,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+				   console.log(e);
+				}
+			});
+		})
+		.then (function()
+		{
+			myTable = "#";
+			return $.ajax({
+			   type: 'GET',
+				url: auto_common_spec_url_wm,
 				async: true,
 				jsonpCallback: 'jsonCallback',
 				contentType: "application/json",
