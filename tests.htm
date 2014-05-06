@@ -74,8 +74,9 @@
 <script>
 	var NUM_BUILDS = 3;
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
-	var ats_server_url =		"http://192.168.0.11:8081/test.php";
-
+	//var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
+	
 	var auto_common_spec_mc40 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
 	var auto_common_spec_mc45 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC45)/api/json?jsonp=?&depth=1"
 	
@@ -84,24 +85,36 @@
 		return s.substr(s.length-size);
 	}
 
-	function pushBuildToATS(buildSpec, buildPassed, buildDescription, buildDate, buildDuration, buildFailed, buildTotal, buildSkipped, buildPercentagePassed)
+	function pushBuildToATS(buildDevice, buildPassed, buildDescription, buildDate, buildDuration, buildFailed, buildTotal, buildSkipped, buildPercentagePassed)
 	{
+		var buildversion = buildDescription.substring(8);
+		var appDescription = 'auto_common_spec (Android)';
+		if (buildDevice == 'mc45')
+			appDescription = 'auto_common_spec (Windows Mobile)';
+		console.log(appDescription);
 		$.post(ats_server_url,
 		{
-			spec:buildSpec,
-			desc:buildDescription,
-			date:buildDate,
-			duration:buildDuration,
-			passed:buildPassed,
-			failed:buildFailed,
-			total:buildTotal,
-			skipped:buildSkipped,
-			percentagePassed:buildPercentagePassed
+			operation:'beta_build',
+			version:buildversion,
+			app:appDescription,
+//			build:'hello',
+			tests_total:buildTotal,
+			tests_passed:buildPassed
+			
+//			spec:buildDevice,
+//			desc:buildDescription,
+//			date:buildDate,
+//			duration:buildDuration,
+//			passed:buildPassed,
+//			failed:buildFailed,
+//			total:buildTotal,
+//			skipped:buildSkipped,
+//			percentagePassed:buildPercentagePassed
 		},
 		function(data,status)
 		{
 			if (status === "success")
-				toastr.success('Server Response: ' + data, 'Successfully Submitted to ATS');
+				toastr.success('Server Response: ' + JSON.stringify(data), 'Successfully Submitted to ATS');
 			else
 				toastr.error('Failed to submit data to ATS', 'Failed to Submit to ATS');
 		});
@@ -156,8 +169,8 @@
 				row = row + "<td>" + formattedBuildDate + "</td>";
 				row = row + "<td>" + parseInt(builds[i].duration / 1000 / 60, 10) + " minutes</td>";
 				row = row + "<td><a href='" + builds[i].url + "testReport/' target='new'>Results Link</a></td>";
-				var spec = myTable.slice(1, myTable.indexOf('_table'));
-				row = row + "<td>" + "<button type='button' class='btn btn-default btn-sm' onclick='javascript:pushBuildToATS(\"" + spec + "\",\"" + passed + "\",\"" + builds[i].description + "\",\"" + builds[i].timestamp + "\",\"" + builds[i].duration + "\",\"" + failed + "\",\"" + total + "\",\"" + skipped + "\",\"" + percentagePassed + "\")'><span class='glyphicon glyphicon-upload'></span> Push to ATS</button>" + "</td>";
+				var device = myTable.slice(1, myTable.indexOf('_table'));
+				row = row + "<td>" + "<button type='button' class='btn btn-default btn-sm' onclick='javascript:pushBuildToATS(\"" + device + "\",\"" + passed + "\",\"" + builds[i].description + "\",\"" + builds[i].timestamp + "\",\"" + builds[i].duration + "\",\"" + failed + "\",\"" + total + "\",\"" + skipped + "\",\"" + percentagePassed + "\")'><span class='glyphicon glyphicon-upload'></span> Push to ATS</button>" + "</td>";
 				row = row + "</tr>";
 			}
 			//console.log(myTable);

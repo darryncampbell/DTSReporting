@@ -44,11 +44,26 @@
       <!-- Main component for a primary marketing message or call to action -->
 	  <H1>Builds</H1>
 		
-		<H2>Auto Common Spec</H2>
-		<table class="table table-striped" width="647" id="auto_common_spec_table_body">
+		<H2>Auto Common Spec - Windows Mobile</H2>
+		<table class="table table-striped" width="647" id="auto_common_spec_wm_table_body">
 		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
 		<tbody></tbody></table>	  
 
+		<H2>Auto Common Spec - CE</H2>
+		<table class="table table-striped" width="647" id="auto_common_spec_ce_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+		<H2>Auto Common Spec - Android</H2>
+		<table class="table table-striped" width="647" id="auto_common_spec_android_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+
+<!--		<H2>Auto Common Spec</H2>
+		<table class="table table-striped" width="647" id="auto_common_spec_table_body">
+		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+		<tbody></tbody></table>	  
+-->
 		<H2>Manual Common Spec</H2>
 		<table class="table table-striped" width="647" id="manual_common_spec_table_body">
 		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
@@ -84,7 +99,7 @@
 	var manual_common_spec_url ="http://192.168.0.11:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
 	var meb_url =				"http://192.168.0.11:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
 	var dcc_js_tests_url =		"http://192.168.0.11:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
-	// var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	//var ats_server_url =		"http://192.168.0.11:8081/test.php";
 	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
 
 	function pad(num, size) {
@@ -94,16 +109,40 @@
 
 	function pushBuildToATS(buildSpec, buildSuccess, buildDescription, theBuildDate, buildDuration)
 	{
+		var buildversion = buildDescription.substring(8);
+		console.log(buildSpec);
+		var appDescription = "";
+		if (buildSpec == "auto_common_spec_wm")
+			appDescription = "auto_common_spec (Windows Mobile)";
+		else if (buildSpec == "auto_common_spec_ce")
+			appDescription = "auto_common_spec (CE)";
+		else if (buildSpec == "auto_common_spec_android")
+			appDescription = "auto_common_spec (Android)";
+		else if (buildSpec == "meb")
+			appDescription = "Motorola Enterprise Browser";
 		var buildDate = new Date((theBuildDate * 1));//new Date(theBuildDate);
 		var utc = buildDate.toUTCString();
 //		var formattedBuildDate = buildDate.getDate() + " " + monthsFull[buildDate.getMonth()] + " " + buildDate.getFullYear() + " " + pad(buildDate.getHours(),2) + ":" + pad(buildDate.getMinutes(),2) + " BST";
-		var desc = buildDescription + ".  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.  <br/>Result: " + buildSuccess + ".  App: " + buildSpec + "";
+		//var desc = buildDescription + ".  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.  <br/>Result: " + buildSuccess + ".  App: " + buildSpec + "";
+		var theLabel = "label-success";
+		var buildText = ""
+		if (buildSuccess === "failure" || buildSuccess === "aborted")
+			theLabel = 'label-danger';
+		
+		var desc = "<span class='label " + theLabel + "'>" + buildSuccess + "</span>  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.";
 
 		$.post(ats_server_url,
 		{
-			operation:'add_version',
-			created:utc,
-			description:desc
+//			operation:'add_version',
+//			created:utc,
+//			description:desc
+
+			operation:'beta_build',
+			version:buildversion,
+			app:appDescription,
+			build:desc,
+//			tests_total:buildTotal,
+//			tests_passed:buildPassed
 	
 //			spec:buildSpec,
 //			success:buildSuccess,
@@ -232,10 +271,44 @@
 		})
 		.then (function()
 		{
-			myTable = "#";
+			myTable = "#auto_common_spec_wm_table_body";
 			return $.ajax({
 			   type: 'GET',
 				url: auto_common_spec_url_wm,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+				   console.log(e);
+				}
+			});
+		})
+		.then (function()
+		{
+			myTable = "#auto_common_spec_ce_table_body";
+			return $.ajax({
+			   type: 'GET',
+				url: auto_common_spec_url_ce,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+				   console.log(e);
+				}
+			});
+		})
+		.then (function()
+		{
+			myTable = "#auto_common_spec_android_table_body";
+			return $.ajax({
+			   type: 'GET',
+				url: auto_common_spec_url_android,
 				async: true,
 				jsonpCallback: 'jsonCallback',
 				contentType: "application/json",
