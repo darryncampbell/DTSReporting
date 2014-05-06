@@ -140,6 +140,8 @@
 //				row = row + "<td><span class='label " + theLabel + "'>" + buildText + "</span></td>";
 				row = row + "<td>" + builds[i].description + "</td>";
 				var actionIndex = 1;
+				if (builds[i].actions[actionIndex] == undefined)
+					continue;
 				if (builds[i].actions[actionIndex].failCount === undefined)
 					actionIndex = 2;
 				if (builds[i].result === "FAILURE" || builds[i].result === "ABORTED" || builds[i].building == true)
