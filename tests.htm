@@ -72,7 +72,7 @@
     <script src="./assets/bootstrap-3.1.1/js/bootstrap.min.js"></script>
 
 <script>
-	var NUM_BUILDS = 3;
+	var NUM_BUILDS = 6;
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
 	//var ats_server_url =		"http://192.168.0.11:8081/test.php";
 	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
@@ -91,7 +91,7 @@
 		var appDescription = 'auto_common_spec (Android)';
 		if (buildDevice == 'mc45')
 			appDescription = 'auto_common_spec (Windows Mobile)';
-		console.log(appDescription);
+		console.log(buildversion);
 		$.post(ats_server_url,
 		{
 			operation:'beta_build',
@@ -140,9 +140,7 @@
 //				row = row + "<td><span class='label " + theLabel + "'>" + buildText + "</span></td>";
 				row = row + "<td>" + builds[i].description + "</td>";
 				var actionIndex = 1;
-				if (builds[i].actions[actionIndex] == undefined)
-					continue;
-				if (builds[i].actions[actionIndex].failCount === undefined)
+				if (builds[i].actions[actionIndex] != undefined && builds[i].actions[actionIndex].failCount === undefined)
 					actionIndex = 2;
 				if (builds[i].result === "FAILURE" || builds[i].result === "ABORTED" || builds[i].building == true)
 				{

@@ -129,7 +129,8 @@
 		if (buildSuccess === "failure" || buildSuccess === "aborted")
 			theLabel = 'label-danger';
 		
-		var desc = "<span class='label " + theLabel + "'>" + buildSuccess + "</span>  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.";
+		//var desc = "" + buildSuccess + "  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.";
+		var desc = "" + buildSuccess + "";
 
 		$.post(ats_server_url,
 		{
