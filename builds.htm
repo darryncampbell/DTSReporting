@@ -44,41 +44,59 @@
       <!-- Main component for a primary marketing message or call to action -->
 	  <H1>Builds</H1>
 		
-		<H2>Auto Common Spec - Windows Mobile</H2>
-		<table class="table table-striped" width="647" id="auto_common_spec_wm_table_body">
-		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
-		<tbody></tbody></table>	  
+		<div class="panel panel-primary">
+			<div class="panel-heading"><H2>Auto Common Spec</H2></div>
+			<div class="panel-body">
+				<H3>Windows Mobile / CE</H3>
+				<table class="table table-striped" width="647" id="auto_common_spec_wm_table_body">
+				<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+				<tbody></tbody></table>	  
 
-		<H2>Auto Common Spec - CE</H2>
+<!--		<H2>Auto Common Spec - CE</H2>
 		<table class="table table-striped" width="647" id="auto_common_spec_ce_table_body">
 		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
 		<tbody></tbody></table>	  
-
-		<H2>Auto Common Spec - Android</H2>
-		<table class="table table-striped" width="647" id="auto_common_spec_android_table_body">
-		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
-		<tbody></tbody></table>	  
+-->
+				<H3>Android</H3>
+				<table class="table table-striped" width="647" id="auto_common_spec_android_table_body">
+				<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+				<tbody></tbody></table>	  
 
 <!--		<H2>Auto Common Spec</H2>
 		<table class="table table-striped" width="647" id="auto_common_spec_table_body">
 		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
 		<tbody></tbody></table>	  
 -->
-		<H2>Manual Common Spec</H2>
-		<table class="table table-striped" width="647" id="manual_common_spec_table_body">
-		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
-		<tbody></tbody></table>	  
 
-		<H2>Motorola Enterprise Browser</H2>		
+			</div>
+		</div>
+
+		<div class="panel panel-primary">
+			<div class="panel-heading"><H2>Manual Common Spec</H2></div>
+			<div class="panel-body">
+				<table class="table table-striped" width="647" id="manual_common_spec_table_body">
+				<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+				<tbody></tbody></table>	  
+
+			</div>
+		</div>
+
+			
+<!--		<H2>Motorola Enterprise Browser</H2>		
 		<table class="table table-striped" width="647" id="meb_table_body">
 		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
 		<tbody></tbody></table>	  
+-->
+		<div class="panel panel-primary">
+			<div class="panel-heading"><H2>DCC Javascript Tests</H2></div>
+			<div class="panel-body">
+				<table class="table table-striped" width="647" id="dcc_js_tests_table_body">
+				<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
+				<tbody></tbody></table>	  
+			</div>
+		</div>
 
-		<H2>DCC Javascript Tests</H2>		
-		<table class="table table-striped" width="647" id="dcc_js_tests_table_body">
-		<thead><tr><th>#</th><th>Success?</th><th>Build Description</th><th>Build Date / Time</th><th>Duration</th><th>Send Result</th></tr></thead>
-		<tbody></tbody></table>	  
-
+		
 	  </div> <!-- /container -->
 
     <!-- Bootstrap core JavaScript
@@ -113,9 +131,9 @@
 		console.log(buildSpec);
 		var appDescription = "";
 		if (buildSpec == "auto_common_spec_wm")
-			appDescription = "auto_common_spec (Windows Mobile)";
-		else if (buildSpec == "auto_common_spec_ce")
-			appDescription = "auto_common_spec (CE)";
+			appDescription = "auto_common_spec (Windows Mobile / CE)";
+//		else if (buildSpec == "auto_common_spec_ce")
+//			appDescription = "auto_common_spec (CE)";
 		else if (buildSpec == "auto_common_spec_android")
 			appDescription = "auto_common_spec (Android)";
 		else if (buildSpec == "meb")
@@ -143,7 +161,7 @@
 			name:buildversion,
 			app:appDescription,
 			build:desc,
-			//comment:buildComment
+			comment:buildComment
 //			tests_total:buildTotal,
 //			tests_passed:buildPassed
 	
@@ -237,24 +255,24 @@
 				}
 			});
 		})
-		.then (function() 
-		{
-			myTable = "#meb_table_body tbody";
-			return $.ajax(
-			{
-				type: 'GET',
-				url: meb_url,
-				async: true,
-				jsonpCallback: 'jsonCallback',
-				contentType: "application/json",
-				dataType: 'jsonp',
-				success: processResponse,
-				error: function(e) 
-				{
-					console.log(e);
-				}
-			});
-		})
+//		.then (function() 
+//		{
+//			myTable = "#meb_table_body tbody";
+//			return $.ajax(
+//			{
+//				type: 'GET',
+//				url: meb_url,
+//				async: true,
+//				jsonpCallback: 'jsonCallback',
+//				contentType: "application/json",
+//				dataType: 'jsonp',
+//				success: processResponse,
+//				error: function(e) 
+//				{
+//					console.log(e);
+//				}
+//			});
+//		})
 		.then (function()
 		{
 			myTable = "#dcc_js_tests_table_body tbody";
@@ -289,23 +307,23 @@
 				}
 			});
 		})
-		.then (function()
-		{
-			myTable = "#auto_common_spec_ce_table_body";
-			return $.ajax({
-			   type: 'GET',
-				url: auto_common_spec_url_ce,
-				async: true,
-				jsonpCallback: 'jsonCallback',
-				contentType: "application/json",
-				dataType: 'jsonp',
-				success: processResponse,
-				error: function(e)
-				{
-				   console.log(e);
-				}
-			});
-		})
+//		.then (function()
+//		{
+//			myTable = "#auto_common_spec_ce_table_body";
+//			return $.ajax({
+//			   type: 'GET',
+//				url: auto_common_spec_url_ce,
+//				async: true,
+//				jsonpCallback: 'jsonCallback',
+//				contentType: "application/json",
+//				dataType: 'jsonp',
+//				success: processResponse,
+//				error: function(e)
+//				{
+//				   console.log(e);
+//				}
+//			});
+//		})
 		.then (function()
 		{
 			myTable = "#auto_common_spec_android_table_body";
