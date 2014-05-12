@@ -74,7 +74,7 @@
 <script>
 	var NUM_BUILDS = 6;
 	var months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
-	//var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	//var ats_server_url =		"http://www.wtgdev.co.uk/xfh386/echo.php";
 	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
 	
 	var auto_common_spec_mc40 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
@@ -95,7 +95,7 @@
 		$.post(ats_server_url,
 		{
 			operation:'beta_build',
-			version:buildversion,
+			name:buildversion,
 			app:appDescription,
 //			build:'hello',
 			tests_total:buildTotal,

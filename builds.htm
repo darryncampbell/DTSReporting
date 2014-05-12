@@ -99,7 +99,7 @@
 	var manual_common_spec_url ="http://192.168.0.11:8080/job/Build%20App%20-%20Manual%20Common%20Spec/api/json?jsonp=?&depth=1";
 	var meb_url =				"http://192.168.0.11:8080/job/Build%20App%20-%20Motorola%20Enterprise%20Browser/api/json?jsonp=?&depth=1";
 	var dcc_js_tests_url =		"http://192.168.0.11:8080/job/Build%20App%20-%20DCC%20Javascript%20Tests/api/json?jsonp=?&depth=1";
-	//var ats_server_url =		"http://192.168.0.11:8081/test.php";
+	//var ats_server_url =		"http://www.wtgdev.co.uk/xfh386/echo.php";
 	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
 
 	function pad(num, size) {
@@ -131,6 +131,7 @@
 		
 		//var desc = "" + buildSuccess + "  Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.";
 		var desc = "" + buildSuccess + "";
+		var buildComment = "Took " + parseInt(buildDuration / 1000 / 60, 10) + " mins.";
 
 		$.post(ats_server_url,
 		{
@@ -139,9 +140,10 @@
 //			description:desc
 
 			operation:'beta_build',
-			version:buildversion,
+			name:buildversion,
 			app:appDescription,
 			build:desc,
+			//comment:buildComment
 //			tests_total:buildTotal,
 //			tests_passed:buildPassed
 	
