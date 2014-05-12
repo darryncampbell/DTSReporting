@@ -98,7 +98,7 @@
 		var buildversion = buildDescription.substring(8);
 		var appDescription = 'auto_common_spec (Android)';
 		if (buildDevice == 'mc45')
-			appDescription = 'auto_common_spec (Windows Mobile)';
+			appDescription = 'auto_common_spec (Windows Mobile / CE)';
 		console.log(buildversion);
 		$.post(ats_server_url,
 		{
