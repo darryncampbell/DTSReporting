@@ -52,10 +52,23 @@
 						Skipped
 						
 		-->
+		<!--
+		
 		<div class="panel panel-primary">
 			<div class="panel-heading"><H2>MC40 (Android)</H2></div>
 			<div class="panel-body">
 				<table class="table table-striped" width="647" id="mc40_table_body">
+				<thead><tr><th>#</th><th>Description</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
+				<tbody></tbody></table>	  
+			</div>
+		</div>
+		
+		-->
+		
+		<div class="panel panel-primary">
+			<div class="panel-heading"><H2>TC55 (Android)</H2></div>
+			<div class="panel-body">
+				<table class="table table-striped" width="647" id="tc55_table_body">
 				<thead><tr><th>#</th><th>Description</th><th>Statistics</th><th>Test Date / Time</th><th>Duration</th><th>Results Link</th><th>Send Result</th></tr></thead>
 				<tbody></tbody></table>	  
 			</div>
@@ -86,6 +99,7 @@
 	var ats_server_url =		"http://ats.wtgdev.co.uk/interface";
 	
 	var auto_common_spec_mc40 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC40)/api/json?jsonp=?&depth=1"
+	var auto_common_spec_tc55 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(TC55)/api/json?jsonp=?&depth=1"
 	var auto_common_spec_mc45 = "http://192.168.0.11:8080/view/Run%20Tests/job/Run%20Auto%20Common%20Spec%20(MC45)/api/json?jsonp=?&depth=1"
 	
 	function pad(num, size) {
@@ -206,6 +220,24 @@
 			{
 				type: 'GET',
 				url: auto_common_spec_mc45,
+				async: true,
+				jsonpCallback: 'jsonCallback',
+				contentType: "application/json",
+				dataType: 'jsonp',
+				success: processResponse,
+				error: function(e)
+				{
+					console.log(e);
+				}
+			});
+		})
+		.then (function() 
+		{
+			myTable = "#tc55_table_body tbody";
+			return $.ajax(
+			{
+				type: 'GET',
+				url: auto_common_spec_tc55,
 				async: true,
 				jsonpCallback: 'jsonCallback',
 				contentType: "application/json",
